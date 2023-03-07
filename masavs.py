@@ -10,9 +10,7 @@ a script to create a vpn server on any given machine in 1 minute
 import argparse
 from os import getcwd
 from os import system
-import re
 import paramiko 
-import requests
 from time import sleep
 
 
