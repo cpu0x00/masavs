@@ -24,6 +24,9 @@ options:
 	- to create a vpn server on a remote server: `# python3 masavs.py remote --ip 1.3.3.7 --ssh_user root --ssh_passwd "this1sp@ssWord"`
 	- to create a vpn server on a local server: `# python3 masavs.py local`
 
+- requirments:
+	`python3 -m pip install paramiko`
+
 - Just in Case
 
 	- *this script creates a vpn server from only linux servers*
