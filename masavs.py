@@ -17,9 +17,10 @@ from time import sleep
 
 
 parser = argparse.ArgumentParser(epilog='(M)ake (A)ny (S)erver (A) (V)pn (S)erver')
-parser.add_argument("--ip", required=True, help='the ip of the server')
+parser.add_argument("mode", choices={'local','remote'}, help='either to run locally or on a remote machine, (local mode does not require any other arg)')
+parser.add_argument("--ip", help='the ip of the server')
 parser.add_argument('--port', type=int,default=22,help='the port of ssh (defaut=22)')
-parser.add_argument('--ssh_user', required=True,help='ssh username to use')
+parser.add_argument('--ssh_user',help='ssh username to use')
 parser.add_argument('--ssh_passwd', help='ssh password to use')
 parser.add_argument('--ssh_key', help='ssh private key to use instead of password')
 parser.add_argument('--ssh_key_phrase', help='ssh private key passphrase to use with (--ssh_key)')
@@ -30,7 +31,7 @@ args = parser.parse_args()
 OPENVPN_SETUP_SCRIPT = 'https://raw.githubusercontent.com/cpu0x00/bypassing-udp-vpn-restriction/main/openvpn-automated-install.sh'
 
 
-def create_openvpn_as(): # creates openvpn access server on the droplet and retrieve the client profile to the local machine
+def create_openvpn_as_remote(): # creates openvpn access server on the droplet and retrieve the client profile to the local machine
 	print('[*] creating openvpn access server on the vps (be patient...)')
 
 	ssh_client = paramiko.SSHClient()
@@ -100,4 +101,36 @@ def create_openvpn_as(): # creates openvpn access server on the droplet and retr
 	print('\n[FLEX] yep its that easy ;)')
 
 
-create_openvpn_as()
+def create_openvpn_as_local():
+	system(f'wget {OPENVPN_SETUP_SCRIPT} -O ~/openvpn-automated-install.sh')
+
+	print('[*] downloaded the (openvpn-automated-install.sh) script to the machine')
+
+	system(f'chmod +x ~/openvpn-automated-install.sh')
+
+
+	while not stdout.readlines() or stderr.readlines():
+		sleep(0.1)
+		if str(stdout.readlines()) == '[]' or str(stderr.readlines()) == '[]':
+			break
+
+	print('[*] executing the setup script...')
+
+	stdin, stdout, stderr =  system('/bin/bash ~/openvpn-automated-install.sh')
+
+
+	while not stdout.readlines() or not stderr.readlines():
+		sleep(0.1)
+		if stdout.readlines() or stderr.readlines():
+			break
+
+
+	print('[*] the openvpn client is: vps-openvpn-client.ovpn ')
+	print('[INFO] to remove the openvpn-as from the machine run the (~/openvpn-automated-install.sh) on the machine and follow the instructions ')
+	print('\n[FLEX] yep its that easy ;)')
+
+
+if args.mode == 'local':
+	create_openvpn_as_local()
+if args.mode == 'remote':
+	create_openvpn_as_remote()
